@@ -1,5 +1,6 @@
 import { Request, Response } from "express"
 import * as userService from "../services/userService"
+import { AuthRequest } from "../middleware/authMiddleware"
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
@@ -36,4 +37,16 @@ export const login = async (req:Request, res:Response) => {
         res.status(401).json({ error: error instanceof Error ? error.message : 'Invalid credentials' })
     }
     
+}
+
+//Protected route example
+export const getProfile = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user){
+            res.status(401).json({ error: "Unauthorized" })
+        }
+        res.status(200).json({ message: "Profile fetched successfully", user: req.user })
+    } catch (error: any) {
+        res.status(500).json({ error: "Failed to fetch profile" })
+    }
 }
