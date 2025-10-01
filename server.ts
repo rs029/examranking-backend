@@ -3,6 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import { PrismaClient } from '@prisma/client'
 import userRoutes from './src/routes/userRoutes'
+import examRoutes from './src/routes/examRoutes'
 
 dotenv.config()
 const app = express()
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 // attach API routes
 app.use("/api/users", userRoutes)
+app.use("/api/exams", examRoutes)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))

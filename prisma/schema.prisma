@@ -19,33 +19,36 @@ model User {
   name      String
   password  String
   createdAt DateTime @default(now())
-  answers   Answer[]
+  attempts ExamAttempt[]
 }
 
 model Exam {
   id        Int      @id @default(autoincrement())
   name      String
-  code      String   // e.g. SSC-CGL-2024
+  code      String?   // e.g. SSC-CGL-2024
+  totalMarks Int
+  marksCorrect Float
+  marksWrong Float
+  marksUnattempted Float
+  meta      Json? // optional JSON with subjects, normalization rules
   createdAt DateTime @default(now())
-  questions Question[]
+  submissions ExamAttempt[]
 }
 
-model Question {
-  id        Int      @id @default(autoincrement())
-  text      String
-  correctOption String
-  examId    Int
-  exam      Exam     @relation(fields: [examId], references: [id])
-  answers   Answer[]
-}
+model ExamAttempt {
+  id      Int     @id @default(autoincrement())
+  userId  Int     
+  examId  Int
+  inputType String      // "URL" or "PDF"
+  url     String?     @unique   //if provide; unique so only one user can use this
+  filePath String?      // if storing uploaded PDF path/S3 key
+  rawData  Json?        // parsed Q/A details
+  score    Int?
+  total    Int?
+  correct  Int?
+  wrong    Int?
+  createdAt DateTime    @default(now())
 
-model Answer {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  questionId Int
-  selectedOption String
-  isCorrect  Boolean
-  user       User     @relation(fields: [userId], references: [id])
-  question   Question @relation(fields: [questionId], references: [id])
-  createdAt  DateTime @default(now())
+  user User @relation(fields: [userId], references: [id])
+  exam Exam @relation(fields: [examId], references: [id])
 }
