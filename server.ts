@@ -9,7 +9,10 @@ dotenv.config()
 const app = express()
 const prisma = new PrismaClient()
 
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:3000', // Adjust as needed for your frontend's URL
+    credentials: true
+}))
 app.use(express.json())
 
 //root test

@@ -6,7 +6,7 @@ export const submitUrl = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.id
         const { examId, url } = req.body
-        const result =  await submissionService.submitByUrl(userId, String(examId), url)
+        const result =  await submissionService.submitByUrl(userId, Number(examId), url)
         res.status(201).json(result)
     } catch (e: any) {
         res.status(400).json({ error: e.message })

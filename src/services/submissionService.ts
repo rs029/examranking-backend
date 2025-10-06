@@ -1,10 +1,10 @@
 import { PrismaClient } from "@prisma/client"
-import { parseUrlExam, parsePdfExam } from "../utils/parser"
+import { parseUrlExam } from "../utils/parser"
 import { calculatedScore } from "../utils/scoring"
 
 const prisma = new PrismaClient()
 
-export const submitByUrl = async (userId: number, examId: number, examUrl: string, url: string) => {
+export const submitByUrl = async (userId: number, examId: number, url: string) => {
     // 1. Prevent use by others
     const existing =  await prisma.examAttempt.findUnique({ where: { url } })
     if (existing) throw new Error("This URL has already been submitted")

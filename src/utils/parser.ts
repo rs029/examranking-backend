@@ -1,6 +1,6 @@
 import axios from "axios";
 import cheerio from "cheerio"
-import pdfParse from "pdf-parse"
+//import pdfParse from "pdf-parse"
 import { ParsedQuestions } from "./scoring";
 
 export const parseUrlExam = async (url: string): Promise<ParsedQuestions[]> => {
@@ -12,39 +12,58 @@ export const parseUrlExam = async (url: string): Promise<ParsedQuestions[]> => {
 
     // 2. Select all question panels
     $(".question-pnl").each((i, el) => {
-        const question = $(el).find(".question, .questionTxt").text().trim()
+        // Questions text
+        const question = $(el).find("td:contains('Q.')").first().text().trim()
 
         // Parse options
         const opts: Record<string, string> = {}
-        $(el).find(".optionsTbl td").each((j, optEl) => {
-            const txt = $(optEl).text().trim()
+        $(el).find("tr").each((j, tr) => {
+            const txt = $(tr).text().trim()
             // attempt to split "1. Option text"
-            const m = txt.match(/^([A-Z])\.*\s*(.*)$/)
-            if (m) opts[m[1]] = m[2]
+            const m = txt.match(/^\d\.*\s*(.*)$/) // e.g. "1. 34 km towards South"
+            if (m) {
+                opts[(j+1).toString()] = m[1]
+            }
         })
 
-        // Candidate's chosen answer
-        const chosenRaw = $(el).find(".chosen answer, .candidateAnswer, .candAns").text().trim() // tune class
-        const correctRaw = $(el).find(".correct answer, .rightAns, .answer").text().trim() // tune class
-        const chosen = normalizeLetter(chosenRaw)
-        const correct = normalizeLetter(correctRaw)
-        out.push({ question, options: opts, chosen, correct, isCorrect: chosen && correct ? chosen === correct : null })
+        // Correct answer
+        let crct: string | null = null
+        $(el).find("tr").each((j, tr) => {
+            if ($(tr).find(".rightAns")) {
+                crct = (j+1).toString()
+            }
+        })
+
+        // Chosen option -> from right-hand metadata
+        let chsn: string | null = null
+        const chosenRaw = $(el).find("td:contains('Chosen Option :')").text().trim()
+        if (chosenRaw.includes("--")) {
+            chsn = null //unattempted
+        } else {
+            const chosenMatch = chosenRaw.match(/Chosen Option\s*:\s*(\d+)/)
+            if (chosenMatch) chsn = chosenMatch[1]  
+        }   
+        //const chosen = normalizeLetter(chosenRaw)
+        out.push({ 
+            question, 
+            options: opts, 
+            chosen: chsn, 
+            correct: crct, 
+            isCorrect: chsn && crct ? chsn === crct : null 
+        })
     })
 
     return out
 }
 
-export const parsePdfExam =  async (buffer: Buffer) => {
+/*export const parsePdfExam =  async (buffer: Buffer) => {
     const data = await pdfParse(buffer)
     const text = data.text
     // implement regex-based parsing to split questions/options/answers
     // return same normalized structure
-    return []
+    return extractQuestions(text)
 }
 
-function normalizeLetter(s: string|null) {
-    if (!s) return null
-    // s could be "Option B" or "B. ..." or "Your Answer: B" -> normalize to "B"
-    const m = s.match(/([A-Z])\b/)
-    return m ? m[1] : null
-}
+export async function extractQuestions((text: string): Promise<ParsedQuestions[]>) => {
+    const blocks = text.split(/Q\.\d+/).filter(Boolean)
+} */
