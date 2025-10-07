@@ -10,7 +10,7 @@ const app = express()
 const prisma = new PrismaClient()
 
 app.use(cors({
-    origin: 'http://localhost:3000', // Adjust as needed for your frontend's URL
+    origin: ['http://localhost:3000', 'https://exam-ranking.vercel.app/'], // Adjust as needed for your frontend's URL
     credentials: true
 }))
 app.use(express.json())
