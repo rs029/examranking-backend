@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = exports.getUsers = void 0;
+exports.getProfile = exports.login = exports.signup = exports.getUsers = void 0;
 const userService = __importStar(require("../services/userService"));
 const getUsers = async (req, res) => {
     try {
@@ -45,15 +45,45 @@ const getUsers = async (req, res) => {
     }
 };
 exports.getUsers = getUsers;
-const createUser = async (req, res) => {
-    const { email, name } = req.body;
+const signup = async (req, res) => {
+    const { name, email, password } = req.body;
+    console.log('Controller: Received request to create user:', { email, name });
     try {
-        const newUser = await userService.createUser(email, name);
+        const newUser = await userService.createUser(name, email, password);
+        console.log('Controller: User created successfully:', newUser);
         res.status(201).json(newUser);
     }
     catch (error) {
-        res.status(500).json({ error: "Failed to create user" });
+        console.error('Controller: Error creating user:', error);
+        res.status(500).json({
+            error: "Failed to create user",
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 };
-exports.createUser = createUser;
+exports.signup = signup;
+const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const { token, user } = await userService.loginUser(email, password);
+        res.status(200).json({ message: "Login Successful", token, user });
+    }
+    catch (error) {
+        res.status(401).json({ error: error instanceof Error ? error.message : 'Invalid credentials' });
+    }
+};
+exports.login = login;
+//Protected route example
+const getProfile = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ error: "Unauthorized" });
+        }
+        res.status(200).json({ message: "Profile fetched successfully", user: req.user });
+    }
+    catch (error) {
+        res.status(500).json({ error: "Failed to fetch profile" });
+    }
+};
+exports.getProfile = getProfile;
 //# sourceMappingURL=userController.js.map
