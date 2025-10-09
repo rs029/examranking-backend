@@ -25,6 +25,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",
     "@prisma/client": "^6.15.0",
+    "@types/node": "^24.3.1",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.2",
     "bullmq": "^5.58.5",
@@ -50,7 +51,6 @@
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
-    "@types/node": "^24.3.1",
     "@types/pdf-parse": "^1.1.5",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
