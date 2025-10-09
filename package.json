@@ -4,9 +4,10 @@
   "description": "ExamRanking exam scoring system backend",
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node server.ts",
+    "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "render-build": "npm install && npm run build",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:seed": "tsx src/scripts/seed.ts",
