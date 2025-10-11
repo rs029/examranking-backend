@@ -48,3 +48,89 @@ export const loginUser = async (email: string, password: string) => {
 
     return { token, user }
 }
+
+export const getUserDashboardData = async (userId: number) => {
+    try {
+        // Get user's recent exam attempts
+        const recentAttempts = await prisma.examAttempt.findMany({ 
+            where: { userId },
+            include: {
+                exam: {
+                    select: { name: true }
+                }
+            },
+            orderBy: { createdAt: 'desc' },
+            take: 5
+        })
+
+        // Get total exams taken
+        const totalExamsTaken = await prisma.examAttempt.count({ 
+            where: { userId } 
+        })
+
+        // Get this month's calculations
+        const startOfMonth = new Date()
+        startOfMonth.setDate(1)
+        startOfMonth.setHours(0, 0, 0, 0)
+
+        const thisMonthCalculations = await prisma.examAttempt.count({
+            where: {
+                userId,
+                createdAt: { gte: startOfMonth }
+            }
+        })
+
+        // Format recent activity
+        const recentActivity = recentAttempts.map(attempt => ({
+            exam: attempt.exam.name,
+            date: formatDate(attempt.createdAt),
+            rank: attempt.score? `Score: ${attempt.score}}`: 'N/A',
+            score: attempt.score || 0,
+            status: 'completed'
+        }))
+
+        // Calculate achievements based on user activity
+        const achievements = [
+            {
+                title: "First Calculation",
+                description: "Completed your first exam rank calculation!",
+                earned: totalExamsTaken >= 1
+            },
+            {
+                title: "Exam Explorer",
+                description: "Tried out 5 different exams.",
+                earned: totalExamsTaken >= 5
+            },
+            {
+                title: "Consistent User",
+                description: "Used the platform for 30+ days.",
+                earned: false
+            }
+        ]
+
+        return {
+            stats: {
+                totalExamsTaken,
+                thisMonthCalculations
+            },
+            recentActivity,
+            achievements
+        }
+    } catch (error) {
+        console.error("Error fetching dashboard data:", error)
+        throw new Error("Failed to fetch dashboard data")
+    }
+}
+
+// Helper function to format date
+const formatDate = (date: Date) => {
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return '1 day ago'
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 14) return '1 week ago'
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`
+    return `${Math.floor(diffDays / 30)} months ago`
+}

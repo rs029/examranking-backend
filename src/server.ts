@@ -5,15 +5,14 @@ import { PrismaClient } from '@prisma/client'
 import userRoutes from './routes/userRoutes'
 import examRoutes from './routes/examRoutes'
 
-dotenv.config()
+dotenv.config({
+    path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
+})
 const app = express()
 const prisma = new PrismaClient()
 
 app.use(cors({
-    origin: [
-        'http://localhost:3000', 
-        'https://exam-ranking.vercel.app'
-    ],
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true
 }))
 app.use(express.json())

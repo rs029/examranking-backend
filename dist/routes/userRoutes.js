@@ -9,5 +9,6 @@ router.post("/signup", userController_1.signup);
 router.post("/login", userController_1.login);
 //Protected route (needs JWT token in headers)
 router.get("/profile", authMiddleware_1.authenticationToken, userController_1.getProfile);
+router.get("/dashboard", authMiddleware_1.authenticationToken, userController_1.getDashboardData);
 exports.default = router;
 //# sourceMappingURL=userRoutes.js.map

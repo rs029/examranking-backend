@@ -50,3 +50,17 @@ export const getProfile = async (req: AuthRequest, res: Response) => {
         res.status(500).json({ error: "Failed to fetch profile" })
     }
 }
+
+export const getDashboardData = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ error: "Unauthorized" })
+        }
+
+        const userId = req.user.id
+        const dashboardData = await userService.getUserDashboardData(userId)
+        res.status(200).json(dashboardData)
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch dashboard data" })
+    }
+}

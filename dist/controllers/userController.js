@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProfile = exports.login = exports.signup = exports.getUsers = void 0;
+exports.getDashboardData = exports.getProfile = exports.login = exports.signup = exports.getUsers = void 0;
 const userService = __importStar(require("../services/userService"));
 const getUsers = async (req, res) => {
     try {
@@ -86,4 +86,19 @@ const getProfile = async (req, res) => {
     }
 };
 exports.getProfile = getProfile;
+const getDashboardData = async (req, res) => {
+    try {
+        if (!req.user) {
+            res.status(401).json({ error: "Unauthorized" });
+            return;
+        }
+        const userId = req.user.id;
+        const dashboardData = await userService.getUserDashboardData(userId);
+        res.status(200).json(dashboardData);
+    }
+    catch (error) {
+        res.status(500).json({ error: "Failed to fetch dashboard data" });
+    }
+};
+exports.getDashboardData = getDashboardData;
 //# sourceMappingURL=userController.js.map

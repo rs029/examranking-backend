@@ -10,5 +10,6 @@ router.post("/login", login)
 
 //Protected route (needs JWT token in headers)
 router.get("/profile", authenticationToken, getProfile)
+router.get("/dashboard", authenticationToken, getProfile)
 
 export default router

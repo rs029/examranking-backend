@@ -25,4 +25,22 @@ export declare const loginUser: (email: string, password: string) => Promise<{
         updatedAt: Date;
     };
 }>;
+export declare const getUserDashboardData: (userId: number) => Promise<{
+    stats: {
+        totalCalculations: number;
+        thisMonthCalculations: number;
+    };
+    recentActivity: {
+        exam: string;
+        date: string;
+        rank: string;
+        score: number;
+        status: string;
+    }[];
+    achievements: {
+        title: string;
+        description: string;
+        earned: boolean;
+    }[];
+}>;
 //# sourceMappingURL=userService.d.ts.map
