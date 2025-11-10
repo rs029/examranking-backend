@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import { PrismaClient } from '@prisma/client'
 import userRoutes from './routes/userRoutes'
 import examRoutes from './routes/examRoutes'
+import submissionRoutes from './routes/submissionRoutes'
 
 dotenv.config({
     path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
@@ -31,6 +32,7 @@ app.get("/", (req: Request, res: Response) => {
 // attach API routes
 app.use("/api/users", userRoutes)
 app.use("/api/exams", examRoutes)
+app.use("/api/submissions", submissionRoutes)
 
 const PORT = process.env.PORT || 5000
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))

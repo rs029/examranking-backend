@@ -4,7 +4,7 @@ import { AuthRequest } from "../middleware/authMiddleware"
 
 export const submitUrl = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.user.id
+        const userId = req.user.userId
         const { examId, url } = req.body
         const result =  await submissionService.submitByUrl(userId, Number(examId), url)
         res.status(201).json(result)

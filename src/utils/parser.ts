@@ -1,5 +1,5 @@
 import axios from "axios";
-import cheerio from "cheerio"
+import * as cheerio from "cheerio"
 //import pdfParse from "pdf-parse"
 import { ParsedQuestions } from "./scoring";
 
@@ -20,19 +20,50 @@ export const parseUrlExam = async (url: string): Promise<ParsedQuestions[]> => {
         $(el).find("tr").each((j, tr) => {
             const txt = $(tr).text().trim()
             // attempt to split "1. Option text"
-            const m = txt.match(/^\d\.*\s*(.*)$/) // e.g. "1. 34 km towards South"
+            const m = txt.match(/(?:^|Ans)(\d+)\.?\s+(.+)$/i) // e.g. "1. 34 km towards South"
             if (m) {
-                opts[(j+1).toString()] = m[1]
+                const optionNum = m[1]
+                const optionText = m[2]
+                if (optionText.length > 0 ) {
+                    opts[optionNum] = optionText
+                }
             }
         })
 
-        // Correct answer
+        // Correct answer - find .rightAns and extract the option number from the same row
         let crct: string | null = null
-        $(el).find("tr").each((j, tr) => {
-            if ($(tr).find(".rightAns")) {
-                crct = (j+1).toString()
+        $(el).find(".rightAns").each((j, ansEl) => {
+            // Get the parent row
+            const parentRow = $(ansEl).closest("tr")
+            const rowText  =  parentRow.text().trim()
+
+            // Try to find option number in the row text
+            // Look for pattern like "1. Option" or "Ans1. Option"
+            const optionMatch = rowText.match(/(?:^|Ans)(\d+)\.?\s+(.+)$/i)
+            if (optionMatch) {
+                crct = optionMatch[1]
+            } else {
+                // Alternative: check if there's a number in the .rightAns element itself
+                const ansText = $(ansEl).text().trim()
+                const numMatch = ansText.match(/(\d+)/)
+                if (numMatch) {
+                    crct = numMatch[1]
+                }
             }
         })
+
+       // If still no correct answer found, try another approach
+       if (!crct) {
+        $(el).find("tr").each((j, tr) => {
+            if ($(tr).find("rightAns").length > 0) {
+                const txt = $(tr).text().trim()
+                const match = txt.match(/(?:^|Ans)(\d+)\.?\s+(.+)$/i)
+                if (match) {
+                    crct = match[1]
+                }
+            }
+        })
+       }
 
         // Chosen option -> from right-hand metadata
         let chsn: string | null = null
