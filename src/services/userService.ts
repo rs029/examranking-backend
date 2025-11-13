@@ -80,14 +80,31 @@ export const getUserDashboardData = async (userId: number) => {
             }
         })
 
-        // Format recent activity
-        const recentActivity = recentAttempts.map(attempt => ({
-            exam: attempt.exam.name,
-            date: formatDate(attempt.createdAt),
-            rank: attempt.score? `Score: ${attempt.score}}`: 'N/A',
-            score: attempt.score || 0,
-            status: 'completed'
-        }))
+        // Format recent activity with rank calculation
+        const recentActivity = await Promise.all(
+            recentAttempts.map(async (attempt) => {
+                let rank: number | null = null
+                
+                // Calculate rank for this attempt only if score exists
+                if (attempt.score !== null) {
+                    const higherCount = await prisma.examAttempt.count({
+                        where: {
+                            examId: attempt.examId,
+                            score: { gt: attempt.score }
+                        }
+                    })
+                    rank = higherCount + 1
+                }
+
+                return {
+                    exam: attempt.exam.name,
+                    date: formatDate(attempt.createdAt),
+                    rank: rank ? `#${rank}` : 'N/A',
+                    score: attempt.score || 0,
+                    status: 'completed'
+                }
+            })
+        )
 
         // Calculate achievements based on user activity
         const achievements = [
@@ -110,7 +127,7 @@ export const getUserDashboardData = async (userId: number) => {
 
         return {
             stats: {
-                totalExamsTaken,
+                totalCalculations: totalExamsTaken,
                 thisMonthCalculations
             },
             recentActivity,
@@ -128,6 +145,7 @@ const formatDate = (date: Date) => {
     const diffTime = Math.abs(now.getTime() - date.getTime())
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     
+    if (diffDays === 1) return 'Hours ago'
     if (diffDays === 1) return '1 day ago'
     if (diffDays < 7) return `${diffDays} days ago`
     if (diffDays < 14) return '1 week ago'

@@ -35,9 +35,9 @@ export const calculatedScore = (parsed: ParsedQuestions[],
     })
 
     const score =
-        correct * rule.marksCorrect +
-        wrong * rule.marksWrong +
-        unattempted * rule.marksUnattempted
+        Number(correct) * Number(rule.marksCorrect) +
+        Number(wrong) * Number(rule.marksWrong) +
+        Number(unattempted) * Number(rule.marksUnattempted)
 
     return { score, total: parsed.length, correct, wrong, unattempted}
 }

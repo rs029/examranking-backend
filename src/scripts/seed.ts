@@ -1,4 +1,10 @@
 import { PrismaClient } from "@prisma/client";  
+import dotenv from "dotenv";
+
+// Load environment variables (same logic as server.ts)
+dotenv.config({
+    path: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development'
+})
 
 const prisma = new PrismaClient()
 
@@ -112,6 +118,11 @@ const examData = [
 async function seedExams() {
     try {
         console.log("Seeding exam data...")
+        console.log("DATABASE_URL:", process.env.DATABASE_URL?.substring(0, 30) + "...")
+
+        // Test connection first
+        await prisma.$connect()
+        console.log("Database connection successfully!")
         
         for (const exam of examData) {
             await prisma.exam.create({
@@ -120,8 +131,13 @@ async function seedExams() {
             console.log(`Inserted exam: ${exam.name}`)
         }
         console.log("Seeding completed.")
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error seeding data:", error)
+        console.error("Error message:", error.message)
+        console.error("Error code:", error.code)
+        if (error.meta) {
+            console.error("Error meta:", error.meta)
+        }
     } finally {
         await prisma.$disconnect()
     }

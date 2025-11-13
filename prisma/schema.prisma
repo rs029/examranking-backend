@@ -44,7 +44,7 @@ model ExamAttempt {
   url     String?     @unique   //if provide; unique so only one user can use this
   filePath String?      // if storing uploaded PDF path/S3 key
   rawData  Json?        // parsed Q/A details
-  score    Int?
+  score    Float?
   total    Int?
   correct  Int?
   wrong    Int?

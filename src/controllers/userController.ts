@@ -57,7 +57,7 @@ export const getDashboardData = async (req: AuthRequest, res: Response) => {
             return res.status(401).json({ error: "Unauthorized" })
         }
 
-        const userId = req.user.id
+        const userId = req.user.userId
         const dashboardData = await userService.getUserDashboardData(userId)
         res.status(200).json(dashboardData)
     } catch (error) {

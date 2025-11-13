@@ -42,3 +42,48 @@ export const submitByUrl = async (userId: number, examId: number, url: string) =
 
     return { attemptId: attempt.id, score, total, correct, wrong, rank, percentile, parsed }
 }
+
+export const getUserHistory = async (userId: number) => {
+    const attempts = await prisma.examAttempt.findMany({
+        where: { userId },
+        include: {
+            exam: {
+                select: {
+                    id: true,
+                    name: true,
+                    code: true,
+                    totalMarks: true,
+                    meta:true
+                },
+            },
+        },
+        orderBy: { createdAt: 'desc'}
+    })
+
+    return attempts.map((attempt) => {
+        const totalQuestions = attempt.total ?? null
+        const correct = attempt.correct ?? null
+        const wrong = attempt.wrong ?? null
+
+        return {
+            id: attempt.id,
+            exam: {
+                id: attempt.exam.id,
+                name: attempt.exam.name,
+                code: attempt.exam.code,
+                totalmarks: attempt.exam.totalMarks,
+                meta: attempt.exam.meta
+            },
+            score: attempt.score,
+            totalQuestions,
+            correct,
+            wrong,
+            unattempted:
+                totalQuestions !== null && correct !== null && wrong !== null
+                ? Math.max(totalQuestions - (correct + wrong), 0)
+                : null,
+            url: attempt.url,
+            submittedAt: attempt.createdAt
+        }
+    })
+}
